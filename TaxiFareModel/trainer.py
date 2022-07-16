@@ -1,5 +1,4 @@
 # imports
-from sklearn import pipeline
 from sklearn.compose import ColumnTransformer
 from sklearn.linear_model import LinearRegression
 from sklearn.model_selection import train_test_split
@@ -10,6 +9,7 @@ from TaxiFareModel.data import clean_data, get_data
 from TaxiFareModel.encoders import DistanceTransformer, TimeFeaturesEncoder
 from TaxiFareModel.utils import compute_rmse
 
+import joblib
 
 class Trainer():
     def __init__(self, X, y):
@@ -49,6 +49,7 @@ class Trainer():
         
         X_train, X_test, y_train, y_test = train_test_split(self.X, self.y, test_size=0.15)
         self.pipeline.fit(X_train, y_train)
+        joblib.dump(self.pipeline, 'trained_model/model.joblib')
         rmse = self.evaluate(X_test, y_test)
         return rmse
 
@@ -61,18 +62,12 @@ class Trainer():
 
 
 if __name__ == "__main__":
-    # get data
     df = get_data()
-    
-    # clean data
     df_cleaned = clean_data(df)
     
-    # set X and y
     y = df_cleaned["fare_amount"]
     X = df_cleaned.drop("fare_amount", axis=1)
     
     # instantiate trainer
-    trained_model = Trainer(X, y)
-
-    # run model
-    trained_model.run()    
+    trainer = Trainer(X, y)
+    trainer.run()    
